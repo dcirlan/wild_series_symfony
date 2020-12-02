@@ -10,11 +10,11 @@ use Symfony\Component\Routing\Annotation\Route;
 Class DefaultController extends AbstractController
 {
     /**
-     * @Route("/")
+     * @Route("/", name="app_index")
      */
     public function index(): Response
     {
-        return $this->render('program/index.html.twig', [
+        return $this->render('index.html.twig', [
         'website' => 'Bienvenue sur Wild Series !',
         ]);
     }
