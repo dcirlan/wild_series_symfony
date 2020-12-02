@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ website }}{% endblock %}
+
+{% block body %}
+    <h1>{{ website }}</h1>
+
+    <a href="{{ path('program_index') }}">
+        Liste des programmes
+    </a>
+{% endblock %}
