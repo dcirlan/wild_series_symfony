@@ -8,9 +8,7 @@
   <div class="media-body">
     <h1 class="mt-0">{{ program.title }}</h1>
     {% for episode in episodes %}
-        <p>{{ episode.number }}</p>
-        <p>{{ episode.title }}</p>
-        <p>{{ episode.synopsis }}</p>
+      <a href="{{ path('program_episode_show', {program_id:program.id, season_id:season.id, episode_id:episode.id}) }}">{{ episode.number }}</a>
     {% endfor %}
   </div>
 </div>
