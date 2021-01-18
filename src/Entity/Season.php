@@ -34,13 +34,9 @@ class Season
      */
     private $description;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $relation;
 
     /**
-     * @ORM\ManyToOne(targetEntity=program::class, inversedBy="seasons")
+     * @ORM\ManyToOne(targetEntity=Program::class, inversedBy="seasons")
      * @ORM\JoinColumn(nullable=false)
      */
     private $program_id;
@@ -92,18 +88,6 @@ class Season
     public function setDescription(string $description): self
     {
         $this->description = $description;
-
-        return $this;
-    }
-
-    public function getRelation(): ?string
-    {
-        return $this->relation;
-    }
-
-    public function setRelation(string $relation): self
-    {
-        $this->relation = $relation;
 
         return $this;
     }
