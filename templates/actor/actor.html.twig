@@ -1,0 +1,29 @@
+{# templates/program/show.html.twig #}
+{% extends 'base.html.twig' %}
+{% block title %}Série #{{ program.id }}{% endblock %}
+
+{% block body %}
+
+<div class="clearfix">
+  <img src="{{program.poster}}" class="col-md-6 float-md-end mb-3 ms-md-3" alt="{{ program.title }} poster">
+
+  <p>
+    <p>Catégorie : {{ program.category.name }}</p>
+  </p>
+
+  <p>
+    <p>{{ program.summary }}</p>
+  </p>
+
+  <p>
+    {% for season in seasons %}
+      <a href="{{ path('program_season_show', {program_id:program.id, season_id:season.id}) }}" class="btn btn-primary">Saison {{ season.number }}</a>
+    {% endfor %}
+  </p>
+</div>
+
+<a href="{{ path('program_index') }}">
+    Retour à la liste des programmes
+</a>
+
+{% endblock %}
