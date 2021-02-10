@@ -4,8 +4,10 @@ namespace App\Controller;
 
 use App\Entity\Season;
 use App\Entity\Episode;
+use App\Entity\Category;
 use App\Entity\Program;
 use App\Form\ProgramType;
+use App\Service\Slugify;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -37,48 +39,51 @@ Class ProgramController extends AbstractController
         );
     }
 
-            /**
-         * The controller for the category add form
-         * @Route("/new", name="new")
-         */
-        public function new(Request $request) : Response
-        {    
-            // Create a new Program Object
-            $program = new Program();
-    
-            // Create the associated Form
-            $form = $this->createForm(ProgramType::class, $program);
-    
-            // Get data from HTTP request
-            $form->handleRequest($request);
-    
-            // Was the form submitted ?
-            if ($form->isSubmitted() && $form->isValid()) {
-                // Deal with the submitted data
+    /**
+     * The controller for the category add form
+     * @Route("/new", name="new")
+     */
+    public function new(Request $request, Slugify $slugify) : Response
+    {    
+        // Create a new Program Object
+        $program = new Program();
 
-                // Get the Entity Manager
-                $entityManager = $this->getDoctrine()->getManager();
+        // Create the associated Form
+        $form = $this->createForm(ProgramType::class, $program);
 
-                // Persist Category Object
-                $entityManager->persist($program);
+        // Get data from HTTP request
+        $form->handleRequest($request);
 
-                // Flush the persisted object
-                $entityManager->flush();
+        // Was the form submitted ?
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Deal with the submitted data
 
-                // Finally redirect to categories list
-                return $this->redirectToRoute('program_index');
-            }
-    
-            // Render the form
-            return $this->render('program/new.html.twig', ["form" => $form->createView()]);
-        }    
+            // Get the Entity Manager
+            $entityManager = $this->getDoctrine()->getManager();
+
+            $slug = $slugify->generate($program->getTitle());
+            $program->setSlug($slug);
+
+            // Persist Category Object
+            $entityManager->persist($program);
+
+            // Flush the persisted object
+            $entityManager->flush();
+
+            // Finally redirect to categories list
+            return $this->redirectToRoute('program_index');
+        }
+
+        // Render the form
+        return $this->render('program/new.html.twig', ["form" => $form->createView()]);
+    }    
 
 
     /**
      * Getting a program by id
      *
-     * @Route("/show/{program_id}", name="show")
-     * @ParamConverter("program", class="App\Entity\Program", options={"mapping": {"program_id": "id"}})
+     * @Route("/show/{slug}", name="show")
+     * @ParamConverter("program", class="App\Entity\Program", options={"mapping": {"slug": "slug"}})
      * @return Response
      */
     public function show(Program $program): Response
@@ -87,7 +92,7 @@ Class ProgramController extends AbstractController
 
         if (!$program) {
             throw $this->createNotFoundException(
-                'No program with id : '.$id.' found in program\'s table.'
+                'No program with id : '.$program.' found in program\'s table.'
             );
         }
         return $this->render('program/show.html.twig', [
@@ -107,7 +112,7 @@ Class ProgramController extends AbstractController
 
         if (!$program) {
             throw $this->createNotFoundException(
-                'No program with id : '.$id.' found in program\'s table.'
+                'No program with id : '.$program.' found in program\'s table.'
             );
         }
         return $this->render('program/season_show.html.twig', [
@@ -127,7 +132,7 @@ Class ProgramController extends AbstractController
     {
         if (!$program) {
             throw $this->createNotFoundException(
-                'No program with id : '.$id.' found in program\'s table.'
+                'No program with id : '.$program.' found in program\'s table.'
             );
         }
 
