@@ -10,6 +10,10 @@
     {% for episode in episodes %}
       <a href="{{ path('program_episode_show', {program_id:program.id, season_id:season.id, episode_id:episode.id}) }}" class="btn btn-primary">Épisode {{ episode.number }}</a>
     {% endfor %}
+    <div>
+      <br>
+      <a href="{{ path('episode_new') }}">Create new</a>
+    </div>
   </div>
 </div>
 
