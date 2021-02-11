@@ -10,6 +10,8 @@ use App\Form\ProgramType;
 use App\Service\Slugify;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
@@ -43,7 +45,7 @@ Class ProgramController extends AbstractController
      * The controller for the category add form
      * @Route("/new", name="new")
      */
-    public function new(Request $request, Slugify $slugify) : Response
+    public function new(Request $request, Slugify $slugify, MailerInterface $mailer) : Response
     {    
         // Create a new Program Object
         $program = new Program();
@@ -69,6 +71,15 @@ Class ProgramController extends AbstractController
 
             // Flush the persisted object
             $entityManager->flush();
+
+            // Send a confirmation email
+            $email = (new Email())
+                ->from($this->getParameter('mailer_from'))
+                ->to('82f1c1d689-5b1620@inbox.mailtrap.io')
+                ->subject('Une nouvelle série vient d\'être publiée !')
+                ->html($this->renderView('program/newProgramEmail.html.twig', ['program' => $program]));
+
+            $mailer->send($email);
 
             // Finally redirect to categories list
             return $this->redirectToRoute('program_index');
