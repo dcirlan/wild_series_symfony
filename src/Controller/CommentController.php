@@ -2,21 +2,32 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Entity\Comment;
 use App\Entity\Episode;
-use App\Entity\User;
 use App\Form\CommentType;
 use App\Repository\CommentRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * @Route("/comment")
  */
 class CommentController extends AbstractController
 {
+    /**
+     * @Route("/", name="comment_index", methods={"GET"})
+     */
+    public function index(CommentRepository $commentRepository): Response
+    {
+        return $this->render('comment/index.html.twig', [
+            'comments' => $commentRepository->findAll(),
+        ]);
+    }
+
     /**
      * @Route("/new/{id}", name="comment_new", methods={"GET","POST"})
      */
@@ -31,6 +42,8 @@ class CommentController extends AbstractController
             $entityManager = $this->getDoctrine()->getManager();
             $comment->setAuthor($user);
             $comment->setEpisode($episode);
+            // set the program's owner
+            $comment->setAuthor($this->getUser());
             $entityManager->persist($comment);
             $entityManager->flush();
             $slug = $episode->getSlug();

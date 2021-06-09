@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Season;
 use App\Entity\Episode;
-use App\Entity\Category;
 use App\Entity\Program;
 use App\Form\ProgramType;
 use App\Service\Slugify;
@@ -65,6 +64,9 @@ Class ProgramController extends AbstractController
 
             $slug = $slugify->generate($program->getTitle());
             $program->setSlug($slug);
+            
+            // set the program's owner
+            $program->setOwner($this->getUser());
 
             // Persist Category Object
             $entityManager->persist($program);
@@ -113,6 +115,35 @@ Class ProgramController extends AbstractController
     }
 
     /**
+     * @Route("/{slug}/edit", name="edit", methods={"GET","POST"})
+     */
+    public function edit(Request $request, Program $program): Response
+    {
+
+        // Check wether the logged in user is the owner of the program
+        if (!($this->getUser() == $program->getOwner())) {
+            // If not the owner, throws a 403 Access Denied exception
+            throw new AccessDeniedException('Only the owner can edit the program!');
+        }
+
+        $form = $this->createForm(ProgramType::class, $program);
+        $form->handleRequest($request);
+
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->getDoctrine()->getManager()->flush();
+
+            return $this->redirectToRoute('program_index');
+        }
+
+        return $this->render('season/edit.html.twig', [
+            'program' => $program,
+            'form' => $form->createView(),
+        ]);
+    }
+
+
+    /**
      * @Route("/{program_id}/seasons/{season_id}", name="season_show")
      * @ParamConverter("program", class="App\Entity\Program", options={"mapping": {"program_id": "id"}})
      * @ParamConverter("season", class="App\Entity\Season", options={"mapping": {"season_id": "id"}})
@@ -134,7 +165,7 @@ Class ProgramController extends AbstractController
     }
 
     /**
-     * @Route("/programs/{program_id}/seasons/{season_id}/episodes/{episode_id}", name="episode_show")
+     * @Route("/{program_id}/seasons/{season_id}/episodes/{episode_id}", name="episode_show")
      * @ParamConverter("program", class="App\Entity\Program", options={"mapping": {"program_id": "id"}})
      * @ParamConverter("season", class="App\Entity\Season", options={"mapping": {"season_id": "id"}})
      * @ParamConverter("episode", class="App\Entity\Episode", options={"mapping": {"episode_id": "id"}})
