@@ -24,8 +24,9 @@ class UserFixtures extends Fixture
         $contributor->setRoles(['ROLE_CONTRIBUTOR']);
         $contributor->setPassword($this->passwordEncoder->encodePassword(
             $contributor,
-            'password'
+            'contributorpassword'
         ));
+
         $manager->persist($contributor);
 
         // Création d’un utilisateur de type “administrateur”
@@ -34,10 +35,12 @@ class UserFixtures extends Fixture
         $admin->setRoles(['ROLE_ADMIN']);
         $admin->setPassword($this->passwordEncoder->encodePassword(
             $admin,
-            'password'
+            'adminpassword'
         ));
-        $manager->persist($admin);
 
+        $manager->persist($admin);
+        $this->addReference('admin', $admin);
         // Sauvegarde des 2 nouveaux utilisateurs :
-        $manager->flush();    }
+        $manager->flush();
+    }
 }

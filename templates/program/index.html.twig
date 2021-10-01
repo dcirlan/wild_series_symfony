@@ -14,7 +14,9 @@
         {% for program in programs %}
         <div class="col-sm-6">
             <div class="card border-primary mb-3 h-100" style="max-width: 18rem;">
-                <div class="card-header"><h4 class="card-title">{{ loop.index }} / {{ program.title }}</h4></div>
+                <div class="card-header">
+                    <h4 class="card-title">{{ loop.index }} / {{ program.title }}</h4>
+                </div>
                 <!-- <img src="..." class="card-img-top" alt="..."> -->
                 <div class="card-body">
                     <h5 class="card-title">Catégorie : {{ program.category.name }}</h5>
