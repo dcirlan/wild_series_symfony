@@ -6,6 +6,11 @@
 
     <div class="clearfix">
         <img src="{{ program.poster }}" class="col-md-6 float-md-end mb-3 ms-md-3" alt="{{ program.title }} poster">
+        {% if app.user %}
+            <a href="{{ path('program_watchlist', {id: program.id})}}">
+                <i class="bi {{ app.user.isInWatchlist(program) ? 'bi-heart-fill' : 'bi-heart' }}"></i>
+            </a>
+        {% endif %}
 
         <p>Catégorie : {{ program.category.name }}</p>
 
