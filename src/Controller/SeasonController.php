@@ -6,6 +6,7 @@ use App\Entity\Season;
 use App\Form\SeasonType;
 use App\Repository\SeasonRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -39,7 +40,16 @@ class SeasonController extends AbstractController
             $entityManager->persist($season);
             $entityManager->flush();
 
-            return $this->redirectToRoute('season_index');
+            // Once the form is submitted, valid and the data inserted in database,
+            // you can define the success flash message
+            $this->addFlash('success', 'A new season has been created');
+
+            $program = $season->getProgramId();
+            $programSlug = $program->getSlug();
+
+            return $this->redirectToRoute('program_show', [
+                'slug' => $programSlug
+            ]);
         }
 
         return $this->render('season/new.html.twig', [
@@ -65,7 +75,7 @@ class SeasonController extends AbstractController
      * @param Request $request
      * @param Season $season
      * @return Response
-     * @throws \Symfony\Component\Form\Exception\LogicException
+     * @throws LogicException
      */
     public function edit(Request $request, Season $season): Response
     {
@@ -74,6 +84,10 @@ class SeasonController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
+
+            // Once the form is submitted, valid and the data inserted in database,
+            // you can define the success flash message
+            $this->addFlash('success', 'The season has been edited');
 
             return $this->redirectToRoute('season_index');
         }
@@ -89,12 +103,24 @@ class SeasonController extends AbstractController
      */
     public function delete(Request $request, Season $season): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$season->getId(), $request->request->get('_token'))) {
+        if (
+            $this->isCsrfTokenValid(
+                'delete'.$season->getId(),
+                    $request->request->get('_token')
+            )
+        ) {
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->remove($season);
             $entityManager->flush();
+
+            $this->addFlash('danger', 'The season has been deleted');
         }
 
-        return $this->redirectToRoute('season_index');
+        $program = $season->getProgramId();
+        $programSlug = $program->getSlug();
+
+        return $this->redirectToRoute('program_show', [
+            'slug' => $programSlug
+        ]);
     }
 }

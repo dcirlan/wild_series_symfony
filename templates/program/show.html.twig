@@ -4,49 +4,49 @@
 
 {% block body %}
 
-<div class="clearfix">
-  <img src="{{program.poster}}" class="col-md-6 float-md-end mb-3 ms-md-3" alt="{{ program.title }} poster">
+    <div class="clearfix">
+        <img src="{{ program.poster }}" class="col-md-6 float-md-end mb-3 ms-md-3" alt="{{ program.title }} poster">
 
-  <p>
-    <p>Catégorie : {{ program.category.name }}</p>
-  </p>
+        <p>Catégorie : {{ program.category.name }}</p>
 
-  <p>
-    <p>{{ program.summary }}</p>
-  </p>
-  <p>
-    <strong>Acteurs :</strong>
+        <p>{{ program.summary }}</p>
+        <strong>Acteurs :</strong>
 
-    <ul>
+        <ul>
 
-        {% for actor in program.actors %}
+            {% for actor in program.actors %}
 
-            <li>{{ actor.name }} </li>
+                <li>{{ actor.name }} </li>
 
-        {% else %}
+            {% else %}
 
-            <li>Aucun acteur pour cette série</li>
+                <li>Aucun acteur pour cette série</li>
 
-        {% endfor %}
+            {% endfor %}
 
-    </ul>
+        </ul>
 
-  </p>
-  <div>
-    {% if is_granted("ROLE_ADMIN") %}
-      <a href="{{ path('program_edit', { 'slug': program.slug} ) }}">Éditer</a>
-    {%endif%}
-  </div>
+        <div>
+            {% if is_granted("ROLE_ADMIN") %}
+                <a href="{{ path('program_edit', { 'slug': program.slug} ) }}">Éditer</a>
+            {% endif %}
+        </div>
 
-  <p>
-    {% for season in seasons %}
-      <a href="{{ path('program_season_show', {program_id:program.id, season_id:season.id}) }}" class="btn btn-primary">Saison {{ season.number }}</a>
-    {% endfor %}
-  </p>
-</div>
+        {% if is_granted('ROLE_ADMIN') %}
+            {{ include('program/_delete_form.html.twig') }}
+        {% endif %}
 
-<a href="{{ path('program_index') }}">
-    Retour à la liste des programmes
-</a>
+        <p>
+            {% for season in seasons %}
+                <a href="{{ path('program_season_show', {program_id:program.id, season_id:season.id}) }}"
+                   class="btn btn-primary">Saison {{ season.number }}</a>
+            {% endfor %}
+            <a href="{{ path('season_new') }}">Create new</a>
+        </p>
+    </div>
+
+    <a href="{{ path('program_index') }}">
+        Retour à la liste des programmes
+    </a>
 
 {% endblock %}

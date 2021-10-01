@@ -3,6 +3,7 @@
 {% block title %}All programs{% endblock %}
 
 {% block body %}
+    {{ app.session.get('total') }}
     <h1>Toutes les séries de la table program : </h1>
     {{ form_start(form) }}
     {{ form_widget(form) }}

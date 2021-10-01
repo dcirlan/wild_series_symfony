@@ -45,6 +45,9 @@ class EpisodeController extends AbstractController
             $entityManager->persist($episode);
             $entityManager->flush();
 
+            // Once the form is submitted, valid and the data inserted in database, you can define the success flash message
+            $this->addFlash('success', 'A new episode has been created');
+
             // Send a confirmation email
             $email = (new Email())
                 ->from($this->getParameter('mailer_from'))
@@ -54,8 +57,13 @@ class EpisodeController extends AbstractController
 
             $mailer->send($email);
 
+            $season = $episode->getSeason();
+            $program = $season->getProgramId();
+            $programSlug = $program->getSlug();
 
-            return $this->redirectToRoute('episode_index');
+            return $this->redirectToRoute('program_show', [
+                'slug' => $programSlug
+            ]);
         }
 
         return $this->render('episode/new.html.twig', [
@@ -90,6 +98,9 @@ class EpisodeController extends AbstractController
 
             $this->getDoctrine()->getManager()->flush();
 
+            // Once the form is submitted, valid and the data inserted in database, you can define the success flash message
+            $this->addFlash('success', 'The episode has been edited');
+
             return $this->redirectToRoute('episode_index');
         }
 
@@ -108,8 +119,16 @@ class EpisodeController extends AbstractController
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->remove($episode);
             $entityManager->flush();
+
+            $this->addFlash('danger', 'The episode has been deleted');
         }
 
-        return $this->redirectToRoute('episode_index');
+        $season = $episode->getSeason();
+        $program = $season->getProgramId();
+        $programSlug = $program->getSlug();
+
+        return $this->redirectToRoute('program_show', [
+            'slug' => $programSlug
+        ]);
     }
 }

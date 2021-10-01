@@ -133,4 +133,9 @@ class Season
 
         return $this;
     }
+
+    public function __toString()
+    {
+        return strval($this->number);
+    }
 }

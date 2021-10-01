@@ -30,7 +30,7 @@ Class CategoryController extends AbstractController
         $categories = $this->getDoctrine()
             ->getRepository(Category::class)
             ->findAll();
- 
+
         return $this->render(
             'category/index.html.twig',
             ['categories' => $categories]
@@ -43,16 +43,16 @@ Class CategoryController extends AbstractController
          * @IsGranted("ROLE_ADMIN")
          */
         public function new(Request $request) : Response
-        {    
+        {
             // Create a new Category Object
             $category = new Category();
-    
+
             // Create the associated Form
             $form = $this->createForm(CategoryType::class, $category);
-    
+
             // Get data from HTTP request
             $form->handleRequest($request);
-    
+
             // Was the form submitted ?
             if ($form->isSubmitted() && $form->isValid()) {
                 // Deal with the submitted data
@@ -66,14 +66,17 @@ Class CategoryController extends AbstractController
                 // Flush the persisted object
                 $entityManager->flush();
 
+                // Once the form is submitted, valid and the data inserted in database, you can define the success flash message
+                $this->addFlash('success', 'Nouvelle catégorie ajoutée');
+
                 // Finally redirect to categories list
                 return $this->redirectToRoute('category_index');
             }
-    
+
             // Render the form
             return $this->render('category/new.html.twig', ["form" => $form->createView()]);
-        }    
-    
+        }
+
         // L'action show() se trouvera plus bas
 
     /**

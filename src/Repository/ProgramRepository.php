@@ -22,8 +22,8 @@ class ProgramRepository extends ServiceEntityRepository
     public function findLikeName(string $name)
     {
         $queryBuilder = $this->createQueryBuilder('p')
-            ->join('p.actors', 'a')
             ->where('p.title LIKE :name')
+            ->join('p.actors', 'a')
             ->orWhere('a.name LIKE :name')
             ->setParameter('name', '%' . $name . '%')
             ->orderBy('p.title', 'ASC')

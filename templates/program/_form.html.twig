@@ -1,0 +1,11 @@
+<div class="row mb-2 form-card">
+    <div class="col-1"></div>
+    <div class="col-10 text-center bg-light card shadow p-3 mb-5 bg-white rounded new-trip-form">
+        {{ form_start(form) }}
+        <div class="mb-2">
+            {{ form_widget(form) }}
+            <button class="btn btn-primary">{{ button_label|default('Ajouter') }}</button>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>

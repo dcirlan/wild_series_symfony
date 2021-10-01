@@ -7,6 +7,7 @@ use App\Entity\Episode;
 use App\Entity\Program;
 use App\Service\Slugify;
 use App\Form\ProgramType;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mime\Email;
 use App\Form\SearchProgramFormType;
 use App\Repository\ProgramRepository;
@@ -16,6 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 /**
  * @Route("/programs", name="program_")
@@ -29,9 +31,14 @@ Class ProgramController extends AbstractController
      * @Route("/", name="index")
      * @return Response A response instance
      */
-
-    public function index(Request $request, ProgramRepository $programRepository): Response
+    public function index(Request $request, ProgramRepository $programRepository, SessionInterface $session): Response
     {
+        if (!$session->has('total')) {
+            $session->set('total', 0); // if total doesn't exist in session, it is initialized.
+        }
+        $total = $session->get('total'); // get actual value in session with 'total' key.
+
+
         $form = $this->createForm(SearchProgramFormType::class);
         $form->handleRequest($request);
 
@@ -53,7 +60,7 @@ Class ProgramController extends AbstractController
      * @Route("/new", name="new")
      */
     public function new(Request $request, Slugify $slugify, MailerInterface $mailer) : Response
-    {    
+    {
         // Create a new Program Object
         $program = new Program();
 
@@ -72,7 +79,7 @@ Class ProgramController extends AbstractController
 
             $slug = $slugify->generate($program->getTitle());
             $program->setSlug($slug);
-            
+
             // set the program's owner
             $program->setOwner($this->getUser());
 
@@ -82,7 +89,10 @@ Class ProgramController extends AbstractController
             // Flush the persisted object
             $entityManager->flush();
 
-            // Send a confirmation email
+            // Once the form is submitted, valid and the data inserted in database, you can define the success flash message
+            $this->addFlash('success', 'Un nouveau program vient d\'être ajouté');
+
+            //Send a confirmation email
             $email = (new Email())
                 ->from($this->getParameter('mailer_from'))
                 ->to('82f1c1d689-5b1620@inbox.mailtrap.io')
@@ -97,7 +107,7 @@ Class ProgramController extends AbstractController
 
         // Render the form
         return $this->render('program/new.html.twig', ["form" => $form->createView()]);
-    }    
+    }
 
 
     /**
@@ -105,6 +115,7 @@ Class ProgramController extends AbstractController
      *
      * @Route("/show/{slug}", name="show")
      * @ParamConverter("program", class="App\Entity\Program", options={"mapping": {"slug": "slug"}})
+     * @param Program $program
      * @return Response
      */
     public function show(Program $program): Response
@@ -137,14 +148,16 @@ Class ProgramController extends AbstractController
         $form = $this->createForm(ProgramType::class, $program);
         $form->handleRequest($request);
 
-
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
+
+            // Once the form is submitted, valid and the data inserted in database, you can define the success flash message
+            $this->addFlash('success', 'The program has been edited');
 
             return $this->redirectToRoute('program_index');
         }
 
-        return $this->render('season/edit.html.twig', [
+        return $this->render('program/edit.html.twig', [
             'program' => $program,
             'form' => $form->createView(),
         ]);
@@ -178,7 +191,7 @@ Class ProgramController extends AbstractController
      * @ParamConverter("season", class="App\Entity\Season", options={"mapping": {"season_id": "id"}})
      * @ParamConverter("episode", class="App\Entity\Episode", options={"mapping": {"episode_id": "id"}})
      */
-    public function showEpisode(Program $program, Season $season, Episode $episode)
+    public function showEpisode(Program $program, Season $season, Episode $episode): Response
     {
         if (!$program) {
             throw $this->createNotFoundException(
@@ -191,5 +204,24 @@ Class ProgramController extends AbstractController
             'season' => $season,
             'episode' => $episode,
         ]);
+    }
+
+    /**
+     * @param Request $request
+     * @param Program $program
+     * @return Response
+     * @Route("/{id}", name="delete", methods={"DELETE"})
+     */
+    public function delete(Request $request, Program $program): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$program->getId(), $request->request->get('_token'))) {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->remove($program);
+            $entityManager->flush();
+
+            $this->addFlash('danger', 'The program has been deleted');
+        }
+
+        return $this->redirectToRoute('program_index');
     }
 }
